@@ -3,6 +3,14 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
+const postRoutes = require("./routes/postRoutes");
+const mediaRoutes = require("./routes/mediaRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const commentRoutes = require("./routes/commentRoutes");
+const tagRoutes = require("./routes/tagRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
+const newsletterRoutes = require("./routes/newsletterRoutes");
 
 dotenv.config();
 
@@ -20,6 +28,15 @@ mongoose
 
 
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/media", mediaRoutes);
+app.use("/api/admin", adminRoutes)
+app.use("/api/comments", commentRoutes)
+app.use("/api/tags", tagRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/newsletters", newsletterRoutes)
+
 
 // Basic Route
 app.get("/", (req, res) => {

@@ -8,20 +8,20 @@ const authMiddleware = require("../middleware/authMiddleware");
 // Public routes
 router.get("/", categoryController.getAllCategories); // Get all categories
 
-// Protected routes (Admin and Editor)
+// Protected routes (Admin and Admin)
 router.post(
   "/",
-  authMiddleware.verifyEditor,
+  authMiddleware.verifyAdmin,
   categoryController.createCategory
 ); // Create a new category
 router.put(
   "/:id",
-  authMiddleware.verifyEditor,
+  authMiddleware.verifyAdmin,
   categoryController.updateCategory
 ); // Update a category
 router.delete(
   "/:id",
-  authMiddleware.verifyEditor,
+  authMiddleware.verifyAdmin,
   categoryController.deleteCategory
 ); // Delete a category
 

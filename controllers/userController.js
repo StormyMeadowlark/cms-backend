@@ -1,14 +1,13 @@
 // controllers/userController.js
-
 const User = require("../models/User");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Post = require("../models/Post");
+const bcrypt = require("bcrypt")
 
-// Register a new user
+// controllers/userController.js
 exports.registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
 
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
@@ -16,15 +15,12 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create a new user
+    // Directly save the plaintext password (Not recommended for production)
     const newUser = new User({
       username,
       email,
-      password: hashedPassword,
-      role: "Viewer", // Default role is 'Viewer'
+      password: password,
+      role // Save the plaintext password
     });
 
     await newUser.save();
@@ -34,7 +30,8 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-// Login a user
+// controllers/userController.js
+
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -45,7 +42,7 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    // Check if the password matches
+    // Compare the plaintext password with the hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
@@ -55,9 +52,7 @@ exports.loginUser = async (req, res) => {
     const token = jwt.sign(
       { _id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
+      { expiresIn: "30d" }
     );
 
     res.status(200).json({ token, role: user.role });

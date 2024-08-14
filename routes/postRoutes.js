@@ -10,7 +10,7 @@ router.get("/", postController.getAllPosts); // Get all posts (published only)
 router.get("/:id", postController.getPostById); // Get post by ID (published only)
 
 // Protected routes (Admin and Editor)
-router.post("/", authMiddleware.verifyEditor, postController.createPost); // Create a new post
+router.post("/", authMiddleware.verifyAdmin, postController.createPost); // Create a new post
 router.put("/:id", authMiddleware.verifyEditor, postController.updatePost); // Update a post
 router.delete("/:id", authMiddleware.verifyEditor, postController.deletePost); // Delete a post
 
@@ -25,5 +25,16 @@ router.post(
   authMiddleware.verifyEditor,
   postController.unpublishPost
 ); // Unpublish a post
+
+router.post(
+  "/:postId/like",
+  authMiddleware.verifyUser,
+  postController.likePost
+);
+router.post(
+  "/:postId/dislike",
+  authMiddleware.verifyUser,
+  postController.dislikePost
+);
 
 module.exports = router;

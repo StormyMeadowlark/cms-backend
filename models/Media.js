@@ -12,7 +12,7 @@ const MediaSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["Image", "Video", "Document", "Other"],
+      enum: ["Image", "Video", "Document", "Other", "image/png"],
       required: true,
     },
     uploadDate: {

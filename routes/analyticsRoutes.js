@@ -1,20 +1,27 @@
-// routes/analyticsRoutes.js
-
 const express = require("express");
 const router = express.Router();
 const analyticsController = require("../controllers/analyticsController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-// Protected routes (Admin and Editor)
-router.get(
-  "/",
-  authMiddleware.verifyAdmin,
-  analyticsController.getAllAnalytics
-); // Get all analytics data
+// Route to record a view for a specific post
+router.post(
+  "/record/:postId",
+  authMiddleware.verifyUser, // Assuming any logged-in user can trigger a view
+  analyticsController.recordView
+);
+
+// Route to get analytics data for a specific post
 router.get(
   "/post/:postId",
-  authMiddleware.verifyAdmin,
+  authMiddleware.verifyAdmin, // Admins only
   analyticsController.getAnalyticsByPost
-); // Get analytics data for a specific post
+);
+
+// Route to get all analytics data
+router.get(
+  "/",
+  authMiddleware.verifyAdmin, // Admins only
+  analyticsController.getAllAnalytics
+);
 
 module.exports = router;

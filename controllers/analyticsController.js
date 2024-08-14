@@ -5,23 +5,24 @@ const Post = require("../models/Post");
 exports.recordView = async (req, res) => {
   try {
     const { postId } = req.params;
+    console.log("Recording view for post:", postId); // Debugging
 
-    // Find the post's analytics data
     let analytics = await Analytics.findOne({ post: postId });
+    console.log("Found analytics:", analytics); // Debugging
 
     if (!analytics) {
-      // If no analytics data exists for this post, create a new record
       analytics = new Analytics({
         post: postId,
         views: 0,
         likes: 0,
         dislikes: 0,
       });
+      console.log("Created new analytics record:", analytics); // Debugging
     }
 
-    // Increment the views count
     analytics.views += 1;
     await analytics.save();
+    console.log("Updated analytics:", analytics); // Debugging
 
     res.status(200).json(analytics);
   } catch (error) {
@@ -29,6 +30,7 @@ exports.recordView = async (req, res) => {
     res.status(500).json({ error: "Error recording view" });
   }
 };
+
 
 // Retrieve analytics for a specific post
 exports.getAnalyticsByPost = async (req, res) => {

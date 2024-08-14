@@ -4,15 +4,17 @@ const express = require("express");
 const router = express.Router();
 const mediaController = require("../controllers/mediaController");
 const authMiddleware = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware")
 
-// Protected routes (Admin and Editor)
+// Protected routes (Admin and Admin)
 router.post(
   "/upload",
-  authMiddleware.verifyEditor,
+  authMiddleware.verifyAdmin,
+  upload.single('file'), // Use the Multer middleware here
   mediaController.uploadMedia
-); // Upload media
-router.get("/", authMiddleware.verifyEditor, mediaController.getAllMedia); // Get all media
-router.get("/:id", authMiddleware.verifyEditor, mediaController.getMediaById); // Get media by ID
-router.delete("/:id", authMiddleware.verifyEditor, mediaController.deleteMedia); // Delete media
+);
+router.get("/", authMiddleware.verifyAdmin, mediaController.getAllMedia); // Get all media
+router.get("/:id", authMiddleware.verifyAdmin, mediaController.getMediaById); // Get media by ID
+router.delete("/:id", authMiddleware.verifyAdmin, mediaController.deleteMedia); // Delete media
 
 module.exports = router;

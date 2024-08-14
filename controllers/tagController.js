@@ -1,22 +1,19 @@
 // controllers/tagController.js
-
 const Tag = require("../models/Tag");
+const mongoose = require("mongoose");
 
 // Create a new tag
 exports.createTag = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, description } = req.body;
+    console.log("Tag data:", { name, description }); // Debugging line
 
-    const existingTag = await Tag.findOne({ name });
-    if (existingTag) {
-      return res.status(400).json({ error: "Tag already exists" });
-    }
-
-    const tag = new Tag({ name });
+    const tag = new Tag({ name, description });
     await tag.save();
 
     res.status(201).json(tag);
   } catch (error) {
+    console.error("Error creating tag:", error); // Debugging line
     res.status(500).json({ error: "Error creating tag" });
   }
 };
@@ -24,7 +21,7 @@ exports.createTag = async (req, res) => {
 // Get all tags
 exports.getAllTags = async (req, res) => {
   try {
-    const tags = await Tag.find().sort({ name: 1 }); // Sort alphabetically by name
+    const tags = await Tag.find();
     res.status(200).json(tags);
   } catch (error) {
     res.status(500).json({ error: "Error fetching tags" });
@@ -34,10 +31,14 @@ exports.getAllTags = async (req, res) => {
 // Update a tag
 exports.updateTag = async (req, res) => {
   try {
+    const { name, description } = req.body;
     const { id } = req.params;
-    const { name } = req.body;
 
-    const tag = await Tag.findByIdAndUpdate(id, { name }, { new: true });
+    const tag = await Tag.findByIdAndUpdate(
+      id,
+      { name, description },
+      { new: true }
+    );
 
     if (!tag) {
       return res.status(404).json({ error: "Tag not found" });
@@ -54,14 +55,27 @@ exports.deleteTag = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const tag = await Tag.findByIdAndDelete(id);
+    // Ensure the ID is valid
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid tag ID" });
+    }
 
-    if (!tag) {
+    const result = await Tag.deleteOne({ _id: id });
+
+    if (result.deletedCount === 0) {
       return res.status(404).json({ error: "Tag not found" });
     }
 
     res.status(200).json({ message: "Tag deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Error deleting tag" });
+    console.error("Error deleting tag:", error);
+
+    // Specific error handling for certain cases
+    if (error.name === "CastError") {
+      return res.status(400).json({ error: "Invalid tag ID format" });
+    }
+
+    // Fallback for any other error
+    res.status(500).json({ error: "Internal server error" });
   }
 };

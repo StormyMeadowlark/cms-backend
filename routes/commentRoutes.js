@@ -14,11 +14,13 @@ router.post(
 router.get("/:postId", commentController.getCommentsByPost); // Get all comments for a post
 
 // Protected routes (for admin or the author of the comment)
+
 router.delete(
   "/:id",
   authMiddleware.verifyUser,
   commentController.deleteComment
 ); // Delete a comment
+
 router.put("/:id", authMiddleware.verifyUser, commentController.updateComment); // Edit a comment
 
 module.exports = router;

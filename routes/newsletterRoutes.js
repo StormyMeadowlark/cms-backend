@@ -6,21 +6,33 @@ const newsletterController = require("../controllers/newsletterController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Newsletter Management
+//create newsletter
 router.post(
   "/",
   authMiddleware.verifyAdmin,
   newsletterController.createNewsletter
-); // Create a new newsletter
+); 
+
+//get newsletter by id
+router.get(
+  "/:id",
+  authMiddleware.verifyAdmin,
+  newsletterController.getNewsletterById
+);
+
+//update newsletter
 router.put(
   "/:id",
   authMiddleware.verifyAdmin,
   newsletterController.updateNewsletter
-); // Update a newsletter
+);
+//schedule newsletter
 router.post(
   "/schedule/:id",
   authMiddleware.verifyAdmin,
   newsletterController.scheduleNewsletter
-); // Schedule a newsletter
+); 
+//send a newsletter
 router.post(
   "/send/:id",
   authMiddleware.verifyAdmin,
@@ -29,6 +41,10 @@ router.post(
 
 // Subscription Management
 router.post("/subscribe", newsletterController.subscribe); // Subscribe to newsletters
-router.post("/unsubscribe", newsletterController.unsubscribe); // Unsubscribe from newsletters
-
+router.get("/unsubscribe", newsletterController.unsubscribe); // Unsubscribe from newsletters
+router.get(
+  "/subscribers",
+  authMiddleware.verifyAdmin,
+  newsletterController.getAllSubscribers
+);
 module.exports = router;

@@ -1,35 +1,44 @@
-const AWS = require("aws-sdk");
+const {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
 const { v4: uuidv4 } = require("uuid");
 const Media = require("../models/Media");
-const config = require("../config/config");
+require("dotenv").config();
 
 // Configure AWS SDK for DigitalOcean Spaces
-const spacesEndpoint = new AWS.Endpoint(config.aws.endpoint);
-const s3 = new AWS.S3({
-  endpoint: spacesEndpoint,
-  accessKeyId: config.aws.accessKeyId,
-  secretAccessKey: config.aws.secretAccessKey,
+const s3Client = new S3Client({
+  endpoint: `https://${process.env.SPACES_ENDPOINT}`, // Your Spaces endpoint, e.g., nyc3.digitaloceanspaces.com
+  region: "us-east-1", // Required, but doesn't affect Spaces
+  credentials: {
+    accessKeyId: process.env.SPACES_KEY,
+    secretAccessKey: process.env.SPACES_SECRET,
+  },
+  forcePathStyle: false, // Optional, can be true or false depending on your needs
 });
 
 // Upload a media file
+// Controller: uploadMedia function
 exports.uploadMedia = async (req, res) => {
   try {
-    const file = req.file; // Assuming you're using a middleware like multer
-    const key = `${uuidv4()}.${file.originalname.split(".").pop()}`;
+    const file = req.file;
+    const filename = `${uuidv4()}.${file.originalname.split(".").pop()}`; // Use 'filename' instead of 'key'
 
     const params = {
-      Bucket: config.aws.bucketName,
-      Key: key,
+      Bucket: process.env.SPACES_BUCKET,
+      Key: filename,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: "public-read", // Make the file publicly accessible
+      ACL: "public-read",
     };
 
-    const data = await s3.upload(params).promise();
+    const command = new PutObjectCommand(params);
+    const data = await s3Client.send(command);
 
     const media = new Media({
-      url: data.Location,
-      key: data.Key,
+      filename: filename, // Save as 'filename'
+      url: `https://${params.Bucket}.${process.env.SPACES_ENDPOINT}/${filename}`,
       type: file.mimetype,
       uploadDate: Date.now(),
     });
@@ -41,6 +50,7 @@ exports.uploadMedia = async (req, res) => {
     res.status(500).json({ error: "Error uploading media" });
   }
 };
+
 
 // List all media files
 exports.getAllMedia = async (req, res) => {
@@ -77,13 +87,14 @@ exports.deleteMedia = async (req, res) => {
 
     // Delete from DigitalOcean Spaces
     const params = {
-      Bucket: config.aws.bucketName,
-      Key: media.key,
+      Bucket: process.env.SPACES_BUCKET,
+      Key: media.filename,
     };
-    await s3.deleteObject(params).promise();
+    const command = new DeleteObjectCommand(params);
+    const data = await s3Client.send(command);
 
     // Delete from database
-    await media.remove();
+    await media.deleteOne(media._id)
     res.status(200).json({ message: "Media file deleted successfully" });
   } catch (error) {
     console.error("Error deleting media file:", error);

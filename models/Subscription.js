@@ -13,6 +13,10 @@ const SubscriptionSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    isSubscribed: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

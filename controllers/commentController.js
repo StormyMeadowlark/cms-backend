@@ -70,6 +70,8 @@ exports.updateComment = async (req, res) => {
 };
 
 // Delete a comment
+// controllers/commentController.js
+
 exports.deleteComment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -88,13 +90,17 @@ exports.deleteComment = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    await comment.remove();
+    // Delete the comment
+    await Comment.deleteOne({ _id: id });
+
+    // Remove the comment reference from the associated post
     await Post.findByIdAndUpdate(comment.post, {
       $pull: { comments: comment._id },
     });
 
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
+    console.error("Error deleting comment:", error);
     res.status(500).json({ error: "Error deleting comment" });
   }
 };

@@ -4,55 +4,61 @@ const User = require("../models/User");
 exports.verifyAdmin = async (req, res, next) => {
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
+    console.log("Token:", token);
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({
-      _id: decoded._id,
-      "tokens.token": token,
-    });
+    console.log("Decoded Token:", decoded);
+
+    const user = await User.findById(decoded._id);
+    console.log("User found:", user);
 
     if (!user || user.role !== "Admin") {
-      throw new Error();
+      console.log("Access denied: User is not an admin");
+      return res.status(403).send({ error: "Access denied" });
     }
 
     req.user = user;
     next();
   } catch (error) {
+    console.log("Error verifying admin:", error);
     res.status(403).send({ error: "Access denied" });
   }
 };
 
 exports.verifyEditor = async (req, res, next) => {
-  try {
+    try {
     const token = req.header("Authorization").replace("Bearer ", "");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({
-      _id: decoded._id,
-      "tokens.token": token,
-    });
+    console.log("Token:", token);
 
-    if (!user || (user.role !== "Admin" && user.role !== "Editor")) {
-      throw new Error();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded Token:", decoded);
+
+    const user = await User.findById(decoded._id);
+    console.log("User found:", user);
+
+    if (!user || user.role !== "Admin" || user.role !== "Editor") {
+      console.log("Access denied: User is not an admin");
+      return res.status(403).send({ error: "Access denied" });
     }
 
     req.user = user;
     next();
   } catch (error) {
+    console.log("Error verifying admin:", error);
     res.status(403).send({ error: "Access denied" });
   }
 };
+
 
 // Define verifyUser middleware
 exports.verifyUser = async (req, res, next) => {
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({
-      _id: decoded._id,
-      "tokens.token": token,
-    });
+    const user = await User.findById(decoded._id);
 
     if (!user) {
-      throw new Error();
+      return res.status(401).send({ error: "Please authenticate" });
     }
 
     req.user = user;
