@@ -6,7 +6,11 @@ const socialMediaController = require("../controllers/socialMediaController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Social Media Management
-router.post("/", authMiddleware.verifyAdmin, socialMediaController.createPost); // Create a new social media post
+router.post(
+  "/", 
+  authMiddleware.verifyAdmin,
+  socialMediaController.createPost
+); // Create a new social media post
 router.put(
   "/:id",
   authMiddleware.verifyAdmin,

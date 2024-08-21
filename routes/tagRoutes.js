@@ -9,8 +9,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 router.get("/", tagController.getAllTags); // Get all tags
 
 // Protected routes (Admin and Admin)
-router.post("/", authMiddleware.verifyAdmin, tagController.createTag); // Create a new tag
-router.put("/:id", authMiddleware.verifyAdmin, tagController.updateTag); // Update a tag
-router.delete("/:id", authMiddleware.verifyAdmin, tagController.deleteTag); // Delete a tag
+router.post("/", authMiddleware, tagController.createTag); // Create a new tag
+router.put("/:id", authMiddleware, tagController.updateTag); // Update a tag
+router.delete("/:id", authMiddleware, tagController.deleteTag); // Delete a tag
 
 module.exports = router;

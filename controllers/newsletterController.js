@@ -21,23 +21,16 @@ exports.createNewsletter = async (req, res) => {
   }
 
   try {
-    const newsletter = new Newsletter({
-      title,
-      content,
-      status: "Draft",
-    });
-
+    const newsletter = new Newsletter({ title, content, status: "Draft" });
     await newsletter.save();
-
-    return res.status(201).json({
-      message: "Newsletter created successfully.",
-      newsletter,
-    });
+    return res
+      .status(201)
+      .json({ message: "Newsletter created successfully.", newsletter });
   } catch (error) {
     console.error("Server error during newsletter creation process:", error);
-    return res.status(500).json({
-      message: "Server error occurred during newsletter creation.",
-    });
+    return res
+      .status(500)
+      .json({ message: "Server error occurred during newsletter creation." });
   }
 };
 // Store the scheduled tasks in a map to manage rescheduling
@@ -48,10 +41,9 @@ exports.scheduleNewsletter = async (req, res) => {
   try {
     const { id } = req.params;
     const { sendDate } = req.body;
+    const tenant = req.tenant;
 
-    // Find the newsletter by ID
     const newsletter = await Newsletter.findById(id);
-
     if (!newsletter) {
       return res.status(404).json({ message: "Newsletter not found." });
     }
@@ -62,34 +54,26 @@ exports.scheduleNewsletter = async (req, res) => {
         .json({ message: "Cannot reschedule a sent newsletter." });
     }
 
-    // Parse the sendDate into a cron schedule format (e.g., '0 9 * * *' for 9:00 AM every day)
     const cronSchedule = parseSendDateToCron(sendDate);
-
-    // If a task is already scheduled for this newsletter, unschedule it
     if (scheduledTasks.has(id)) {
       const existingTask = scheduledTasks.get(id);
       existingTask.stop();
     }
 
-    // Schedule the newsletter to be sent at the specified date and time
     const task = cron.schedule(cronSchedule, async () => {
       try {
-        await sendNewsletter(newsletter._id); // Assuming you have a function to send the newsletter
+        await sendNewsletter(newsletter._id, tenant);
         newsletter.status = "Sent";
         newsletter.sendDate = new Date();
         await newsletter.save();
-
-        // Remove the task from the map once it's completed
         scheduledTasks.delete(id);
       } catch (error) {
         console.error("Error sending scheduled newsletter:", error);
       }
     });
 
-    // Store the task in the map to manage it later if needed
     scheduledTasks.set(id, task);
 
-    // Update the status to Scheduled and save the scheduled date
     newsletter.status = "Scheduled";
     newsletter.sendDate = sendDate;
     await newsletter.save();
@@ -115,15 +99,57 @@ function parseSendDateToCron(sendDate) {
   return `${minutes} ${hours} ${dayOfMonth} ${month} *`;
 }
 
-// Function to send the newsletter (you need to implement this)
-async function sendNewsletter(newsletterId) {
-  // Logic to send the newsletter
+// Helper function to convert the sendDate to a cron schedule
+function parseSendDateToCron(sendDate) {
+  const date = new Date(sendDate);
+  const minutes = date.getMinutes();
+  const hours = date.getHours();
+  const dayOfMonth = date.getDate();
+  const month = date.getMonth() + 1; // Months are 0-based in JS
+  return `${minutes} ${hours} ${dayOfMonth} ${month} *`;
 }
 
+async function sendNewsletter(newsletterId, tenant) {
+  try {
+    const newsletter = await Newsletter.findById(newsletterId);
+    if (!newsletter) {
+      console.error("Newsletter not found.");
+      return;
+    }
 
-// Helper function to send the newsletter (using your sendNewsletter logic)
-async function sendNewsletter(newsletter) {
-  // Implement your email sending logic here using SendGrid or Nodemailer
+    const subscribers = await Subscriber.find({ isSubscribed: true });
+    if (subscribers.length === 0) {
+      console.error("No active subscribers found.");
+      return;
+    }
+
+    const subject = newsletter.title;
+    const text = newsletter.content;
+    const html = `<p>${newsletter.content}</p>`;
+    const transporter = createTransporter(tenant.sendGridApiKey); // Use tenant-specific SendGrid API key
+
+    for (const subscriber of subscribers) {
+      const mailOptions = {
+        from: tenant.verifiedSenderEmail, // Sender address
+        to: subscriber.email, // List of receivers
+        subject: subject, // Subject line
+        text: text, // Plain text body
+        html: html, // HTML body
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Newsletter sent to ${subscriber.email}`);
+      } catch (error) {
+        console.error(
+          `Error sending newsletter to ${subscriber.email}:`,
+          error
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error in sendNewsletter function:", error);
+  }
 }
 
 
@@ -173,9 +199,12 @@ exports.updateNewsletter = async (req, res) => {
 
 exports.subscribe = async (req, res) => {
   const { email } = req.body;
+  const tenant = req.tenant;
 
   if (!email) {
-    return res.status(400).json({ message: "Email is required for subscription." });
+    return res
+      .status(400)
+      .json({ message: "Email is required for subscription." });
   }
 
   try {
@@ -195,17 +224,20 @@ exports.subscribe = async (req, res) => {
     await subscriber.save();
 
     const mailOptions = {
-      from: "ashlee@stormymeadowlark.com",
+      from: tenant.verifiedSenderEmail,
       to: email,
       subject: "Welcome to Our Newsletter!",
       text: "Hello and welcome!",
       html: "<b>Hello and welcome to our newsletter!</b>",
     };
 
+    const transporter = createTransporter(tenant.sendGridApiKey);
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending welcome email via Nodemailer:", error);
-        return res.status(500).json({ message: "Failed to send welcome email." });
+        return res
+          .status(500)
+          .json({ message: "Failed to send welcome email." });
       }
 
       console.log("Welcome email sent: " + info.response);
@@ -213,12 +245,15 @@ exports.subscribe = async (req, res) => {
     });
   } catch (error) {
     console.error("Server error during subscription process:", error);
-    return res.status(500).json({ message: "Server error occurred during subscription." });
+    return res
+      .status(500)
+      .json({ message: "Server error occurred during subscription." });
   }
 };
 
 exports.unsubscribe = async (req, res) => {
   const { email } = req.body;
+  const tenant = req.tenant;
 
   if (!email) {
     return res
@@ -241,13 +276,14 @@ exports.unsubscribe = async (req, res) => {
     await subscriber.save();
 
     const mailOptions = {
-      from: "ashlee@stormymeadowlark.com",
+      from: tenant.verifiedSenderEmail,
       to: email,
       subject: "You have been unsubscribed",
       text: "You have successfully unsubscribed from our newsletter.",
       html: "<b>You have successfully unsubscribed from our newsletter.</b>",
     };
 
+    const transporter = createTransporter(tenant.sendGridApiKey);
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error(
