@@ -50,14 +50,16 @@ exports.getAllPosts = async (req, res) => {
       .populate("author", "username")
       .populate("categories", "name")
       .populate("tags", "name")
-      .populate("media", "url")
-      .populate("title","name");
+      .populate("media", "url");
 
+    console.log("Retrieved posts:", posts); // Log retrieved posts
     res.status(200).json(posts);
   } catch (error) {
+    console.error("Error fetching posts:", error);
     res.status(500).json({ error: "Error fetching posts" });
   }
 };
+
 
 // Get a post by ID
 exports.getPostById = async (req, res) => {
