@@ -46,17 +46,15 @@ exports.createPost = async (req, res) => {
 // Get all posts (published)
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find({ publishStatus: "Published" })
-      .populate("author", "username")
-      .populate("categories", "name")
-      .populate("tags", "name")
-      .populate("media", "url");
+    const posts = await Post.find({ publishStatus: "Published" });
 
-    console.log("Retrieved posts:", posts); // Log retrieved posts
+    console.log("Posts retrieved:", posts); // Log posts retrieved
     res.status(200).json(posts);
   } catch (error) {
     console.error("Error fetching posts:", error);
-    res.status(500).json({ error: "Error fetching posts" });
+    res
+      .status(500)
+      .json({ error: "Error fetching posts", details: error.message });
   }
 };
 
