@@ -1,45 +1,41 @@
-// routes/newsletterRoutes.js
-
 const express = require("express");
 const router = express.Router();
-const newsletterController = require("../controllers/newsletterController");
+const {
+  createNewsletter,
+  updateNewsletter,
+  deleteNewsletter,
+  getAllNewsletters,
+  getNewsletterById,
+  subscribe,
+  unsubscribe,
+  sendNewsletter,
+  getAllSubscribers,
+  getSubscriberById,
+} = require("../controllers/newsletterController");
 const authMiddleware = require("../middleware/authMiddleware");
 
+// Create a new newsletter
+router.post("/newsletters", authMiddleware, createNewsletter);
 
-// Newsletter Management
-//create newsletter
-router.post(
-  "/", authMiddleware,
-  newsletterController.createNewsletter
-); 
+// Update an existing newsletter
+router.put("/newsletters/:id", authMiddleware, updateNewsletter);
 
-//get newsletter by id
-router.get(
-  "/:id", authMiddleware,
-  newsletterController.getNewsletterById
-);
+// Delete a newsletter
+router.delete("/newsletters/:id", authMiddleware, deleteNewsletter);
 
-//update newsletter
-router.put(
-  "/:id", authMiddleware,
-  newsletterController.updateNewsletter
-);
-//schedule newsletter
-router.post(
-  "/schedule/:id", authMiddleware,
-  newsletterController.scheduleNewsletter
-); 
-//send a newsletter
-router.post(
-  "/send/:id", authMiddleware,
-  newsletterController.sendNewsletter
-); // Send a newsletter immediately
+// Get all newsletters
+router.get("/newsletters", authMiddleware, getAllNewsletters);
 
-// Subscription Management
-router.post("/subscribe", newsletterController.subscribe); // Subscribe to newsletters
-router.get("/unsubscribe", newsletterController.unsubscribe); // Unsubscribe from newsletters
-router.get(
-  "/subscribers", authMiddleware,
-  newsletterController.getAllSubscribers
-);
+// Get a newsletter by ID
+router.get("/newsletters/:id", authMiddleware, getNewsletterById);
+
+// Subscribe to a newsletter
+router.post("/subscribe", authMiddleware, subscribe);
+
+// Unsubscribe from a newsletter
+router.post("/unsubscribe", authMiddleware, unsubscribe);
+
+// Send a newsletter
+router.post("/:id/send", authMiddleware, sendNewsletter);
+
 module.exports = router;

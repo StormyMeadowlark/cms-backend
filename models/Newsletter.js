@@ -12,12 +12,7 @@ const NewsletterSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    recipients: [
-      {
-        type: String, // Email addresses of the recipients
-        required: true,
-      },
-    ],
+    subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subscription" }],
     status: {
       type: String,
       enum: ["Draft", "Scheduled", "Sent"],
