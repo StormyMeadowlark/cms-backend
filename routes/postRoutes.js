@@ -1,47 +1,38 @@
-// routes/postRoutes.js
-
 const express = require("express");
 const router = express.Router();
 const postController = require("../controllers/postController");
 const authMiddleware = require("../middleware/authMiddleware");
+const tenantMiddleware = require("../middleware/tenantMiddleware");
+
+
 
 // Public routes
-router.get("/", postController.getAllPosts); // Get all posts (published only)
-router.get("/:id", postController.getPostById); // Get post by ID (published only)
+router.get("/:tenantId", postController.getAllPosts);
+router.get("/:tenantId/:postId", postController.getPostById);
 
-// Protected routes (Admin and Admin)
-router.post(
-  "/", authMiddleware,
-  postController.createPost
-); // Create a new post
-router.put(
-  "/:id", authMiddleware,
-  postController.updatePost
-); // Update a post
-router.delete(
-  "/:id", authMiddleware,
-  postController.deletePost
-); // Delete a post
+// Protected routes
+router.post("/:tenantId", authMiddleware, postController.createPost);
+router.put("/:tenantId/:id", authMiddleware, postController.updatePost);
+router.delete("/:tenantId/:id", authMiddleware, postController.deletePost);
 
 // Publishing controls
 router.post(
-  "/:id/publish", authMiddleware,
+  "/:tenantId/:id/publish",
+  authMiddleware,
   postController.publishPost
-); // Publish a post
-router.post(
-  "/:id/unpublish", authMiddleware,
-  postController.unpublishPost
-); // Unpublish a post
-
-router.post(
-  "/:postId/like",
-  postController.likePost
 );
 router.post(
-  "/:postId/dislike",
+  "/:tenantId/:id/unpublish",
+  authMiddleware,
+  postController.unpublishPost
+);
+
+// Like/Dislike controls
+router.post("/:tenantId/:postId/like", authMiddleware, postController.likePost);
+router.post(
+  "/:tenantId/:postId/dislike",
+  authMiddleware,
   postController.dislikePost
 );
-
-
 
 module.exports = router;

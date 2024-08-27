@@ -12,6 +12,7 @@ const PostSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    tenantId: { type:mongoose.Schema.Types.ObjectId, ref: "Tenant", required: true },
     categories: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
     metaTitle: { type: String },

@@ -22,24 +22,28 @@ app.use(cors());
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.log("MongoDB connection error:", err));
 
-
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  console.log("[REQUEST] Headers:", req.headers);
+  console.log("[REQUEST] Body:", req.body);
+  next();
+});
 
 app.use("/api/posts", postRoutes);
 app.use("/api/media", mediaRoutes);
-app.use("/api/comments", commentRoutes)
+app.use("/api/comments", commentRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/analytics", analyticsRoutes);
-app.use("/api/newsletters", newsletterRoutes)
-
+app.use("/api/newsletters", newsletterRoutes);
 
 // Basic Route
 app.get("/", (req, res) => {
+  console.log("[REQUEST] GET request to /");
   res.send("CMS Backend API");
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
