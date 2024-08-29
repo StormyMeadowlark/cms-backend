@@ -16,16 +16,19 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+
+// Corrected CORS configuration
 app.use(
   cors({
     origin: [
-      "https://hemautomotive.com/*",
-      "http://localhost:3000/*",
-      "https://stormymeadowlark.com/*",
-      "http://127.0.0.1:5173/*",
-    ], // Replace with your frontend domain
+      "https://hemautomotive.com",
+      "http://localhost:3000",
+      "https://stormymeadowlark.com",
+      "http://127.0.0.1:5173",
+    ], // List the allowed origins without wildcards
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "x-tenant-id", "Authorization"], // Ensure 'x-tenant-id' is included
+    allowedHeaders: ["Content-Type", "x-tenant-id", "Authorization"], // Ensure required headers are allowed
+    credentials: true, // Include this if you need to allow credentials (cookies, authorization headers)
   })
 );
 
@@ -35,6 +38,7 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB connection error:", err));
 
+// Logging Middleware
 app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url}`);
   console.log("[REQUEST] Headers:", req.headers);
@@ -42,6 +46,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// API Routes
 app.use("/api/posts", postRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/comments", commentRoutes);
