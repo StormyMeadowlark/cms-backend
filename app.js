@@ -18,7 +18,12 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ["https://hemautomotive.com", "http://localhost:3000", "https://stormymeadowlark.com"], // Replace with your frontend domain
+    origin: [
+      "https://hemautomotive.com",
+      "http://localhost:3000",
+      "https://stormymeadowlark.com",
+      "http://127.0.0.1:5173/",
+    ], // Replace with your frontend domain
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "x-tenant-id", "Authorization"], // Ensure 'x-tenant-id' is included
   })
