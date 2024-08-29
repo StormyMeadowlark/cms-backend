@@ -16,7 +16,13 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://hemautomotive.com", "http://localhost:3000", "https://stormymeadowlark.com"], // Replace with your frontend domain
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "x-tenant-id", "Authorization"], // Ensure 'x-tenant-id' is included
+  })
+);
 
 // Connect to MongoDB
 mongoose

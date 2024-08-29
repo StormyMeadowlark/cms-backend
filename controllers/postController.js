@@ -33,24 +33,32 @@ exports.createPost = async (req, res) => {
 };
 
 exports.getAllPosts = async (req, res) => {
+  const { tenantId } = req.params; // Extract tenantId from params for logging
+  const { "x-tenant-id": xTenantId } = req.headers; // Destructure headers for cleaner code
+
   console.log(
-    `[POST /:tenantId] Starting post gathering for tenantId: ${req.params.tenantId}`
+    `[POST /:tenantId] Starting post gathering for tenantId: ${tenantId}`
   );
+
   try {
-    const tenantId = req.headers["x-tenant-id"];
     console.log(
-      `[CONTROLLER] Fetching all published posts for tenantId: ${tenantId}`
+      `[CONTROLLER] Fetching all published posts for tenantId: ${xTenantId}`
     );
 
-    if (!tenantId) {
-      console.error("[CONTROLLER] Tenant ID is missing.");
+    // Validate that the tenant ID is provided in the headers
+    if (!xTenantId) {
+      console.error("[CONTROLLER] Tenant ID is missing in the headers.");
       return res.status(400).json({ error: "X-Tenant-Id header is required" });
     }
 
-    const posts = await Post.find({ tenantId, publishStatus: "Published" });
+    // Fetch posts from the database where tenantId matches and status is Published
+    const posts = await Post.find({
+      tenantId: xTenantId,
+      publishStatus: "Published",
+    });
 
     if (!posts.length) {
-      console.log("[CONTROLLER] No published posts found for this tenant");
+      console.log("[CONTROLLER] No published posts found for this tenant.");
       return res.status(404).json({ error: "No published posts found" });
     }
 
@@ -58,7 +66,7 @@ exports.getAllPosts = async (req, res) => {
     res.status(200).json(posts);
   } catch (error) {
     console.error("[CONTROLLER] Error fetching posts:", error.message);
-    res.status(500).json({ error: "Error fetching posts" });
+    res.status(500).json({ error: "An error occurred while fetching posts." });
   }
 };
 
