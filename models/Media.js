@@ -15,19 +15,29 @@ const MediaSchema = new mongoose.Schema(
       enum: [
         "image/png", // Valid MIME type for PNG images
         "image/jpeg", // Valid MIME type for JPEG images
-        "image/gif",  // Valid MIME type for GIF images
-        "video/mp4",  // Valid MIME type for MP4 videos
-        "video/avi",  // Valid MIME type for AVI videos
+        "image/gif", // Valid MIME type for GIF images
+        "video/mp4", // Valid MIME type for MP4 videos
+        "video/avi", // Valid MIME type for AVI videos
         "video/mpeg", // Valid MIME type for MPEG videos
         "application/pdf", // Valid MIME type for PDF documents
-        "image/svg+xml",   // Valid MIME type for SVG images
-        "Other",      // Custom type for other files
+        "image/svg+xml", // Valid MIME type for SVG images
+        "Other", // Custom type for other files
       ],
       required: true,
     },
     uploadDate: {
       type: Date,
       default: Date.now,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Reference to the User model
+      required: true,
+    },
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant", // Reference to the Tenant model
+      required: true,
     },
   },
   { timestamps: true }
