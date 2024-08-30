@@ -27,6 +27,7 @@ app.use(
       "http://127.0.0.1:5173",
       "http://localhost:5001",
       "http://localhost:5000",
+      "https://skynetrix.tech",
     ], // List the allowed origins without wildcards
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "x-tenant-id", "Authorization"], // Ensure required headers are allowed
