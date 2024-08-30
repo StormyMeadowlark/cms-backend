@@ -12,7 +12,17 @@ const MediaSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["Image", "Video", "Document", "Other", "image/png"],
+      enum: [
+        "image/png", // Valid MIME type for PNG images
+        "image/jpeg", // Valid MIME type for JPEG images
+        "image/gif",  // Valid MIME type for GIF images
+        "video/mp4",  // Valid MIME type for MP4 videos
+        "video/avi",  // Valid MIME type for AVI videos
+        "video/mpeg", // Valid MIME type for MPEG videos
+        "application/pdf", // Valid MIME type for PDF documents
+        "image/svg+xml",   // Valid MIME type for SVG images
+        "Other",      // Custom type for other files
+      ],
       required: true,
     },
     uploadDate: {

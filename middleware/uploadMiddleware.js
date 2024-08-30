@@ -1,9 +1,9 @@
 const multer = require("multer");
 
-// Configure multer storage
+// Configure storage
 const storage = multer.memoryStorage(); // Store files in memory as Buffer objects
 
-// Set up the file filter to accept only certain file types, e.g., images and videos
+// File filter to allow only specific file types
 const fileFilter = (req, file, cb) => {
   if (
     file.mimetype.startsWith("image/") ||
@@ -18,13 +18,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Configure multer
+// Initialize multer with storage, file filter, and limits
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: {
-    fileSize: 1024 * 1024 * 10, // Limit file size to 10MB
-  },
+  limits: { fileSize: 50 * 1024 * 1024 }, // Set limit to 50MB
 });
 
 module.exports = upload;

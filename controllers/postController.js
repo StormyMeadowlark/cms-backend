@@ -1,13 +1,13 @@
 const Post = require("../models/Post");
 const mongoose = require("mongoose");
-const axios = require("axios");
 
+// Create a post
 exports.createPost = async (req, res) => {
   console.log(
     `[POST /:tenantId] Starting post creation for tenantId: ${req.params.tenantId}, userId: ${req.user._id}`
   );
   try {
-    const { tenantId } = req.params.tenantId;
+    const { tenantId } = req.params; // Correct destructuring
     const { title, content } = req.body;
 
     if (!req.user || !req.user._id) {
@@ -17,8 +17,8 @@ exports.createPost = async (req, res) => {
     const post = new Post({
       title,
       content,
-      author: req.user._id, // Correctly use the userId from req.user
-      tenantId: req.params.tenantId,
+      author: req.user._id,
+      tenantId,
       publishDate: Date.now(),
       publishStatus: "Draft", // Default status
     });
@@ -32,30 +32,25 @@ exports.createPost = async (req, res) => {
   }
 };
 
+// Get all posts for a tenant
 exports.getAllPosts = async (req, res) => {
-  const { tenantId } = req.params; // Extract tenantId from params for logging
-  const { "x-tenant-id": xTenantId } = req.headers; // Destructure headers for cleaner code
+  const { tenantId } = req.params;
+  const { "x-tenant-id": xTenantId } = req.headers;
 
   console.log(
     `[POST /:tenantId] Starting post gathering for tenantId: ${tenantId}`
   );
 
   try {
-    console.log(
-      `[CONTROLLER] Fetching all published posts for tenantId: ${xTenantId}`
-    );
-
-    // Validate that the tenant ID is provided in the headers
     if (!xTenantId) {
       console.error("[CONTROLLER] Tenant ID is missing in the headers.");
       return res.status(400).json({ error: "X-Tenant-Id header is required" });
     }
 
-    // Fetch posts from the database where tenantId matches and status is Published
     const posts = await Post.find({
       tenantId: xTenantId,
       publishStatus: "Published",
-    });
+    }).lean();
 
     if (!posts.length) {
       console.log("[CONTROLLER] No published posts found for this tenant.");
@@ -70,19 +65,18 @@ exports.getAllPosts = async (req, res) => {
   }
 };
 
+// Get a specific post by ID
 exports.getPostById = async (req, res) => {
   console.log(
-    `[POST /:tenantId/:postId] Starting to get posts tenantId: ${req.params.tenantId} for post ID: ${req.params.postId}`
+    `[POST /:tenantId/:postId] Starting to get posts for tenantId: ${req.params.tenantId}, post ID: ${req.params.postId}`
   );
   try {
-    const postId = req.params.postId;
-    const tenantId = req.params.tenantId;
+    const { tenantId, postId } = req.params;
 
     console.log(
       `[CONTROLLER] Fetching post ID ${postId} for tenantId: ${tenantId}`
     );
 
-    // Find the post by ID and tenant ID, and ensure it is published
     const post = await Post.findOne({
       _id: postId,
       tenantId,
@@ -102,18 +96,12 @@ exports.getPostById = async (req, res) => {
   }
 };
 
-
-
+// Update a post
 exports.updatePost = async (req, res) => {
   console.log(
     `[POST /:tenantId] Starting post update for tenantId: ${req.params.tenantId}, post ID: ${req.params.id}`
   );
   try {
-    console.log(
-      `[CONTROLLER] Updating post ID ${req.params.id} for tenantId: ${req.params.tenantId}`
-    );
-    console.log("[CONTROLLER] Request body:", req.body);
-
     const {
       title,
       content,
@@ -153,15 +141,12 @@ exports.updatePost = async (req, res) => {
   }
 };
 
+// Delete a post
 exports.deletePost = async (req, res) => {
   console.log(
-    `[POST /:tenantId] Starting post removal for tenantId: ${req.params.tenantId}, userId: ${req.user._id}, Post Id: ${req.params.id}`
+    `[POST /:tenantId] Starting post removal for tenantId: ${req.params.tenantId}, userId: ${req.user._id}, post ID: ${req.params.id}`
   );
   try {
-    console.log(
-      `[CONTROLLER] Deleting post ID ${req.params.id} for tenantId: ${req.params.tenantId}`
-    );
-
     const post = await Post.findByIdAndDelete(req.params.id);
 
     if (!post) {
@@ -177,6 +162,7 @@ exports.deletePost = async (req, res) => {
   }
 };
 
+// Publish a post
 exports.publishPost = async (req, res) => {
   try {
     console.log(
@@ -202,6 +188,7 @@ exports.publishPost = async (req, res) => {
   }
 };
 
+// Unpublish a post
 exports.unpublishPost = async (req, res) => {
   try {
     console.log(
@@ -227,6 +214,7 @@ exports.unpublishPost = async (req, res) => {
   }
 };
 
+// Like a post
 exports.likePost = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -261,6 +249,7 @@ exports.likePost = async (req, res) => {
   }
 };
 
+// Dislike a post
 exports.dislikePost = async (req, res) => {
   try {
     const { postId } = req.params;
