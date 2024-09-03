@@ -104,3 +104,25 @@ exports.deleteComment = async (req, res) => {
     res.status(500).json({ error: "Error deleting comment" });
   }
 };
+
+
+// Controller method to get a comment by ID
+exports.getCommentById = async (req, res) => {
+  const { tenantId, commentId } = req.params;
+
+  try {
+    // Find the comment by its ID and the tenant ID
+    const comment = await Comment.findOne({ _id: commentId, tenant: tenantId });
+
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    res.status(200).json(comment);
+  } catch (error) {
+    console.error("Error fetching comment:", error.message);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching the comment" });
+  }
+};
