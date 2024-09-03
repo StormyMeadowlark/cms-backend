@@ -53,6 +53,30 @@ exports.uploadMedia = async (req, res) => {
   }
 };
 
+exports.updateMediaMetadata = async (req, res) => {
+  const { url, width, height } = req.body; // Get the metadata from the request body
+
+  try {
+    // Find the media by URL and update its dimensions
+    const media = await Media.findOneAndUpdate(
+      { url },
+      { width, height },
+      { new: true } // Return the updated document
+    );
+
+    if (!media) {
+      console.warn("Media file not found for update."); // Log if media file is not found
+      return res.status(404).json({ message: "Media file not found" });
+    }
+
+    console.log("Media metadata updated successfully:", media); // Log success
+    res.status(200).json(media);
+  } catch (error) {
+    console.error("Error updating media metadata:", error.message); // Log error message
+    res.status(500).json({ error: "Error updating media metadata" });
+  }
+};
+
 // List all media files
 exports.getAllMedia = async (req, res) => {
   try {

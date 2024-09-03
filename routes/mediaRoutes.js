@@ -20,6 +20,9 @@ router.post("/upload", upload.single("file"), (req, res) => {
 // Route to get all media files
 router.get("/", mediaController.getAllMedia);
 
+// Route to update image metadata (like size)
+router.put("/update", authMiddleware, mediaController.updateMediaMetadata);
+
 // Route to get all media files by tenant
 router.get("/tenant/:tenantId", mediaController.getMediaByTenant);
 
