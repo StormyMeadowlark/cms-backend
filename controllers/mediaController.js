@@ -46,7 +46,7 @@ exports.uploadMedia = async (req, res) => {
     });
 
     await media.save();
-    res.status(201).json(media);
+    res.status(201).json({ url: media.url });
   } catch (error) {
     console.error("Error uploading media:", error);
     res.status(500).json({ error: "Error uploading media" });
