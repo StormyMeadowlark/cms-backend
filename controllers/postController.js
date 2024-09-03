@@ -7,7 +7,7 @@ exports.createPost = async (req, res) => {
     `[POST /:tenantId] Starting post creation for tenantId: ${req.params.tenantId}, userId: ${req.user._id}`
   );
   try {
-    const { tenantId } = req.params; // Correct destructuring
+    const { tenantId } = req.params;
     const { title, content } = req.body;
 
     if (!req.user || !req.user._id) {
@@ -32,38 +32,42 @@ exports.createPost = async (req, res) => {
   }
 };
 
-// Get all posts for a tenant
+// Get all posts for a tenant, with optional status filtering
 exports.getAllPosts = async (req, res) => {
   const { tenantId } = req.params;
-  const { "x-tenant-id": xTenantId } = req.headers;
+  const { status } = req.query; // Get the status query parameter
 
   console.log(
-    `[POST /:tenantId] Starting post gathering for tenantId: ${tenantId}`
+    `[POST /:tenantId] Starting post gathering for tenantId: ${tenantId} with status: ${
+      status || "all"
+    }`
   );
 
   try {
-    if (!xTenantId) {
-      console.error("[CONTROLLER] Tenant ID is missing in the headers.");
-      return res.status(400).json({ error: "X-Tenant-Id header is required" });
+    const query = { tenantId };
+
+    // Only filter by status if it's explicitly "Published" or "Draft"
+    if (status === "Published" || status === "Draft") {
+      query.publishStatus = status;
     }
 
-    const posts = await Post.find({
-      tenantId: xTenantId,
-      publishStatus: "Published",
-    }).lean();
+    // Fetch posts based on the query
+    const posts = await Post.find(query).sort({ createdAt: -1 }).lean();
 
     if (!posts.length) {
-      console.log("[CONTROLLER] No published posts found for this tenant.");
-      return res.status(404).json({ error: "No published posts found" });
+      console.log("[CONTROLLER] No posts found for this tenant.");
+      return res.status(404).json({ error: "No posts found" });
     }
 
-    console.log("[CONTROLLER] Published posts retrieved successfully:", posts);
+    console.log("[CONTROLLER] Posts retrieved successfully:", posts);
     res.status(200).json(posts);
   } catch (error) {
     console.error("[CONTROLLER] Error fetching posts:", error.message);
     res.status(500).json({ error: "An error occurred while fetching posts." });
   }
 };
+
+
 
 // Get a specific post by ID
 exports.getPostById = async (req, res) => {
@@ -77,15 +81,11 @@ exports.getPostById = async (req, res) => {
       `[CONTROLLER] Fetching post ID ${postId} for tenantId: ${tenantId}`
     );
 
-    const post = await Post.findOne({
-      _id: postId,
-      tenantId,
-      publishStatus: "Published",
-    });
+    const post = await Post.findOne({ _id: postId, tenantId });
 
     if (!post) {
-      console.log("[CONTROLLER] Post not found or not published");
-      return res.status(404).json({ error: "Post not found or not published" });
+      console.log("[CONTROLLER] Post not found");
+      return res.status(404).json({ error: "Post not found" });
     }
 
     console.log("[CONTROLLER] Post retrieved successfully:", post);
