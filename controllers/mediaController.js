@@ -53,6 +53,7 @@ exports.uploadMedia = async (req, res) => {
   }
 };
 
+// Update media metadata (like size)
 exports.updateMediaMetadata = async (req, res) => {
   const { url, width, height } = req.body; // Get the metadata from the request body
 
