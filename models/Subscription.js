@@ -17,6 +17,10 @@ const SubscriptionSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId, // Store tenant ID as ObjectId
+      required: true,
+    },
   },
   { timestamps: true }
 );

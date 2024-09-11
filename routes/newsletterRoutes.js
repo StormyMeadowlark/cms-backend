@@ -9,33 +9,64 @@ const {
   subscribe,
   unsubscribe,
   sendNewsletter,
+  scheduleNewsletter,
   getAllSubscribers,
   getSubscriberById,
 } = require("../controllers/newsletterController");
 const authMiddleware = require("../middleware/authMiddleware");
+const tenantMiddleware = require("../middleware/tenantMiddleware");
 
-// Create a new newsletter
-router.post("/newsletters", authMiddleware, createNewsletter);
+// Corrected routes with added functionality
+router.get(
+  "/:tenantId/subscribers",
+  tenantMiddleware,
+  authMiddleware,
+  getAllSubscribers
+);
+router.get(
+  "/:tenantId/subscribers/:subscriberId",
+  tenantMiddleware,
+  authMiddleware,
+  getSubscriberById
+);
 
-// Update an existing newsletter
-router.put("/newsletters/:id", authMiddleware, updateNewsletter);
+router.post("/:tenantId", authMiddleware, tenantMiddleware, createNewsletter);
+router.put(
+  "/:tenantId/:id",
+  authMiddleware,
+  tenantMiddleware,
+  updateNewsletter
+);
+router.delete(
+  "/:tenantId/:id",
+  authMiddleware,
+  tenantMiddleware,
+  deleteNewsletter
+);
 
-// Delete a newsletter
-router.delete("/newsletters/:id", authMiddleware, deleteNewsletter);
+router.get("/:tenantId", authMiddleware, tenantMiddleware, getAllNewsletters);
+router.get(
+  "/:tenantId/:id",
+  authMiddleware,
+  tenantMiddleware,
+  getNewsletterById
+);
 
-// Get all newsletters
-router.get("/newsletters", authMiddleware, getAllNewsletters);
+router.post("/:tenantId/subscribe", tenantMiddleware, subscribe);
+router.post("/:tenantId/unsubscribe", tenantMiddleware, unsubscribe);
+router.post(
+  "/:tenantId/:id/send",
+  authMiddleware,
+  tenantMiddleware,
+  sendNewsletter
+);
 
-// Get a newsletter by ID
-router.get("/newsletters/:id", authMiddleware, getNewsletterById);
-
-// Subscribe to a newsletter
-router.post("/subscribe", authMiddleware, subscribe);
-
-// Unsubscribe from a newsletter
-router.post("/unsubscribe", authMiddleware, unsubscribe);
-
-// Send a newsletter
-router.post("/:id/send", authMiddleware, sendNewsletter);
+// Add missing route for scheduling a newsletter
+router.post(
+  "/:tenantId/:id/schedule",
+  authMiddleware,
+  tenantMiddleware,
+  scheduleNewsletter
+);
 
 module.exports = router;
