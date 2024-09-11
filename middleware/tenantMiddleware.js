@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const TENANT_SERVICE_URL = "http://localhost:3000/api/v1/verify-tenant";
+const TENANT_SERVICE_URL = "https://skynetrix.tech/api/v1/verify-tenant";
 
 const tenantMiddleware = async (req, res, next) => {
   const tenantId = req.header("x-tenant-id");
