@@ -11,7 +11,6 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes");
 const emailRoutes = require("./routes/emailRoutes");
-
 dotenv.config();
 
 const app = express();

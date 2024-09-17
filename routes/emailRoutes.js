@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const emailController = require("../controllers/emailController");
 const tenantMiddleware = require("../middleware/tenantMiddleware");
+const { submitContactForm } = require("../controllers/contactController"); 
 
 // Apply tenant middleware to all routes
 router.use("/:tenantId/*", tenantMiddleware);
@@ -23,5 +24,7 @@ router.delete(
   "/:tenantId/:templateId/templates",
   emailController.deleteTemplate
 );
+
+router.post("/:tenantId/contact", tenantMiddleware, submitContactForm);
 
 module.exports = router;
