@@ -25,7 +25,6 @@ const PostSchema = new mongoose.Schema(
       default: "Draft",
     },
     publishDate: { type: Date },
-    media: [{ type: mongoose.Schema.Types.ObjectId, ref: "Media" }],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of users who liked the post
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of users who disliked the post
